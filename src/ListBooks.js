@@ -1,18 +1,16 @@
-import React, { Component } from 'react'
+import React from 'react'
+//import React, { Component } from 'react'
 //import { Link } from 'react-router-dom'
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 //import escapeRegExp from 'escape-string-regexp';
 //import sortBy from 'sort-by';
 //import * as BooksAPI from './BooksAPI'
 
-class ListBooks extends Component {
-	static propTypes = {
-		books: PropTypes.array.isRequired,
-		onUpdateShelf: PropTypes.func.isRequired
-	}
-	
+const createReactClass = require('create-react-class');
+
+const ListBooks = createReactClass({
+							
 	render() {
-		
 		const {books,onUpdateShelf,shelf} = this.props
 		return (
                  <div className="bookshelf-books">
@@ -43,8 +41,7 @@ class ListBooks extends Component {
                   </div>
 
 		)
-	}
-}
-
+	}	
+})
 
 export default ListBooks;
