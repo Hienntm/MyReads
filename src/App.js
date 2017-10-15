@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Route, Link } from 'react-router-dom'
 import escapeRegExp from 'escape-string-regexp';
 import sortBy from 'sort-by';
 import ListBooks from './ListBooks'
@@ -11,7 +11,6 @@ class BooksApp extends React.Component {
   constructor(props) {
 	  super(props);
 	  this.state = {
-		  showSearchPage: false, //list, search
 		  books : [],
 		  query: ''
 	  };
@@ -34,28 +33,38 @@ class BooksApp extends React.Component {
   }
 
   updateQuery = (query) => (
-	this.setState({query: query.trim()})
+	this.setState({query: query})
   )
 
   resetQuery = (query) => {
 	this.setState({query: ''})
   }
   
+  handleKeyPress = (event) => {
+	  if(event.key === 'Enter') {
+		  this.updateQuery(event.target.value)
+	  }
+  }
+  
   render() {
 	const {books,query} = this.state;
 	let showingBooks;
 	if(query) {
-		const match = new RegExp(escapeRegExp(query), 'i');
-		showingBooks = books.filter((book) => match.test(book.title)||match.test(book.authors));
-	}else {
-		showingBooks = books;
+//		const match = new RegExp(escapeRegExp(query), 'i');
+//		showingBooks = books.filter((book) => match.test(book.title)||match.test(book.authors));
+		
+		BooksAPI.search(query).then((books) => {
+			this.setState({ books: books })
+	  	})
+		
 	}
 
-	showingBooks.sort(sortBy('title'));	
+	//showingBooks.sort(sortBy('title'));	
 	  
     return (
       <div className="app">
-        {this.state.showSearchPage === true && (
+      
+		<Route path="/search" render={()=>(
           <div className="search-books">
             <div className="search-books-bar">
               <Link to="/" className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</Link>
@@ -68,22 +77,24 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" placeholder="Search by title or author" value={query} onChange={(event) => this.updateQuery(event.target.value)} />
+                <input type="text" placeholder="Search by title or author"  onKeyPress={this.handleKeyPress} />
 
               </div>
             </div>
             <div className="search-books-results">
-			  <ListBooks onUpdateShelf={this.updateShelf} shelf='' books={showingBooks}/>
+
+			  <ListBooks onUpdateShelf={this.updateShelf} shelf='' books={books}/>
+			           
             </div>
           </div>
-        )}
-		{this.state.showSearchPage === false && (
+         )} />
+        
+		<Route exact path="/" render={()=>(		
           <div className="list-books">
             <div className="list-books-title">
               <h1>MyReads</h1>
             </div>
             <div className="list-books-content">
-             
                 <div className="bookshelf">
                   <h2 className="bookshelf-title">Currently Reading</h2>
 				  <ListBooks onUpdateShelf={this.updateShelf} shelf='currentlyReading' books={this.state.books.filter(book => book.shelf === 'currentlyReading')}/>
@@ -95,15 +106,14 @@ class BooksApp extends React.Component {
                 <div className="bookshelf">
                   <h2 className="bookshelf-title">Read</h2>
                   <ListBooks onUpdateShelf={this.updateShelf} shelf='read' books={this.state.books.filter(book => book.shelf === 'read')}/>
-                </div>
-              
+                </div> 
             </div>
             <div className="open-search">
-              
               <Link to="/search" onClick={() => this.setState({ showSearchPage: true })}>Search a book</Link>
             </div>
           </div>
-        )}
+         )} />
+                 
       </div>
     )
   }
