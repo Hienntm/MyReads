@@ -181,3 +181,9 @@ body, .app {
   text-align: center;
   font-size: 0.8em;
 }
+
+.error404 {
+  text-align: center;
+  font-size: 5em;
+  color: dimgrey;
+}
